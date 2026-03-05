@@ -221,6 +221,65 @@ void Link::imu_parsing()
 
 void Link::AHRS_parsing()
 {
+    //ahrs_data.yaw_deg +=90;
+    /*try
+    {
+        ahrs_data.yaw_deg = std::fmod(ahrs_data.yaw_deg, 360.0f);;
+        setYaw_value(ahrs_data.yaw_deg);
+        // yawTimer.restart();
+        //}
+        //yaw_deg = ahrs_data.yaw_deg;
+        setPitch_value(ahrs_data.pitch_deg);
+        setRoll_value(ahrs_data.roll_deg);
+        setuptime_ms_ahrs_value(ahrs_data.uptime_ms);
+
+        if (qIsNaN(ahrs_data.yaw_deg )) {
+            throw std::runtime_error("NaN detected in yaw");
+        }
+        if (qIsNaN(ahrs_data.pitch_deg)) {
+            throw std::runtime_error("NaN detected in pitch");
+        }
+        if (qIsNaN(ahrs_data.roll_deg)) {
+            throw std::runtime_error("NaN detected in roll");
+        }
+
+        if (ahrs_data.yaw_deg  == std::numeric_limits<double>::infinity() || ahrs_data.yaw_deg  == -std::numeric_limits<double>::infinity()) {
+            throw std::overflow_error("Floating point overflow occurred.");
+        }
+
+        if (ahrs_data.pitch_deg == std::numeric_limits<double>::infinity() || ahrs_data.pitch_deg == -std::numeric_limits<double>::infinity()) {
+            throw std::overflow_error("Floating point overflow occurred.");
+        }
+
+        if (ahrs_data.roll_deg == std::numeric_limits<double>::infinity() || ahrs_data.roll_deg == -std::numeric_limits<double>::infinity()) {
+            throw std::overflow_error("Floating point overflow occurred.");
+        }
+
+    }
+    catch (const std::out_of_range& e) {
+        std::cerr << "Index out of range error:" << e.what() << std::endl;
+    }
+    catch (const std::overflow_error& e) {
+        std::cerr << "Caught overflow: " << e.what() << std::endl;
+    }
+    catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument:" << e.what() << std::endl;
+    }
+    catch (const std::logic_error& e) {
+        std::cerr << "Logic error:" << e.what() << std::endl;
+    }
+    catch (const std::runtime_error& e) {
+        std::cerr << "Runtime error:" << e.what() << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr<<"Error:"<<&e << std::endl;
+    }
+    catch(...)
+    {
+        std::cerr<<"Error Unkown" << std::endl;
+
+    }*/
+
 }
 
 void Link::gps_parsing()
@@ -445,6 +504,38 @@ void Link::set_coordinates(double initial_position_x, double initial_position_y)
     long1 = initial_position_y;
 }
 
+float Link::yaw_value() const
+{
+    return yaw_deg;
+}
+float Link:: pitch_value() const
+{
+    return pitch_deg;
+}
+float Link::roll_value() const
+{
+    return roll_deg;
+}
 
+void Link::setYaw_value(float value)
+{
+    if (qFuzzyCompare(yaw_deg, value))
+        return;
 
-// Function to parse the shapefile
+    yaw_deg = value;
+    emit yawValueChanged(yaw_deg);
+}
+void Link:: setPitch_value(float value)
+{
+    if(qFuzzyCompare(pitch_deg, value))
+        return;
+    pitch_deg = value;
+    emit pitchValueChanged(pitch_deg);
+}
+void Link::setRoll_value(float value)
+{
+    if(qFuzzyCompare(roll_deg, value))
+        return;
+    roll_deg = value;
+    emit rollValueChanged(roll_deg);
+}

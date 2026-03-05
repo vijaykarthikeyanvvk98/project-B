@@ -16,10 +16,19 @@
 class Link : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(float yaw_deg READ yaw_value WRITE setYaw_value NOTIFY yawValueChanged)
+    Q_PROPERTY(float pitch_deg READ pitch_value WRITE setPitch_value NOTIFY pitchValueChanged)
+    Q_PROPERTY(float roll_deg READ roll_value WRITE setRoll_value NOTIFY rollValueChanged)
 public:
     Link();
     ~Link();
+    float yaw_value () const;
+    float pitch_value () const;
+    float roll_value () const;
 signals:
+    void yawValueChanged(float value);
+    void pitchValueChanged(float value);
+    void rollValueChanged(float value);
     void data_processed(int);
     void dataUpdated(int);
     void gps_updated();
@@ -69,6 +78,9 @@ public slots:
  * @return Distance in kilometers.
  */
     bool areDoublesEqual(double , double , double epsilon = 1e-9);
+    void setYaw_value(float value);
+    void setPitch_value(float value);
+    void setRoll_value(float value);
     QVariantList get_heartbeat();
     QVariantList get_ahrs();
     QVariantList get_gps();
@@ -158,7 +170,9 @@ private:
     qfloat16 yaw1 = 0;
     qfloat16 pitch1 = 0;
     qfloat16 pitch_actual = 0;
-
+    float yaw_deg=0.0;
+    float pitch_deg=0.0;
+    float roll_deg=0.0;
     qfloat16 roll1 = 0;
     qfloat16 yaw2 = 0;
     qfloat16 pitch2 = 0;

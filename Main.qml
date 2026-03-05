@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Shapes 1.15
 
-import Qt.labs.platform 1.1
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt5Compat.GraphicalEffects
@@ -12,10 +11,9 @@ ApplicationWindow {
     id: root
     visible: true
     color: "black"
-    property real yaw: 0.0
-    property real pitch: 0.0
-    property real roll: 0.0
-
+    property real pitch:link ? link.pitch_deg: 0.0
+    property real yaw:link ? link.yaw_deg :0.0// "0.0\u00B0"
+    property real roll:link ?link.roll_deg: 0.0
     property var data_model1: ["Yaw(\u00B0)","Pitch(\u00B0)","Roll(\u00B0)"]
     property var data_model2: [yaw,pitch,roll]
     property var data_model3: ["black","black","black"]
