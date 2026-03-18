@@ -38,20 +38,35 @@ jobs:
 # 3. Download and Unzip your Custom OpenCV
     - name: Download Custom OpenCV
       shell: pwsh
-      env:
-        GH_TOKEN: ${{ github.token }}  # This "Key" fixes the first error
       run: |
-        # 1. Download the zip from your release tag
-        gh release download v1.0-deps --pattern "build2.zip" --repo ${{ github.repository }}
+        # Using your exact tag: v-1.0.0
+        $url = "https://github.com/vijaykarthikeyanvvk98/project-B/releases/download/v1.0.0/build2.zip"
         
-        # 2. Unzip it
-        Expand-Archive -Path "build2.zip" -DestinationPath "C:\custom_deps" -Force
+        Write-Host "Attempting download from: $url"
+        
+        # Download the zip
+        Invoke-WebRequest -Uri $url -OutFile "build2.zip"
+        
+        # Unzip to a temporary folder
+        if (Test-Path "build2.zip") {
+            Expand-Archive -Path "build2.zip" -DestinationPath "C:\custom_deps" -Force
+            Write-Host "Unzip complete."
+        } else {
+            Write-Error "Download failed! Check if the release is Published and the Tag is correct."
+            exit 1
+        }
 
-    - name: List Files (Debug Step)
+    - name: List Files (The Magic Path Finder)
       shell: pwsh
       run: |
-        # This will show us exactly where the .cmake file is
-        Get-ChildItem -Path "C:\custom_deps" -Recurse -Filter "OpenCVConfig.cmake" | Select-Object FullName
+        # This will search the unzipped folder and tell us the EXACT path to use for CMake
+        $file = Get-ChildItem -Path "C:\custom_deps" -Recurse -Filter "OpenCVConfig.cmake" | Select-Object -First 1
+        if ($file) {
+            Write-Host "FOUND IT! Use this path in the next step:"
+            Write-Host $file.DirectoryName
+        } else {
+            Write-Error "Could not find OpenCVConfig.cmake in the zip file!"
+        }
 
     - name: Configure CMake
       run: |
