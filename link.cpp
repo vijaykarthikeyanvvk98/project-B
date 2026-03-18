@@ -1,9 +1,11 @@
 #include "link.h"
 #include <videostreamer.h>
 #include <QDebug>
+#include <QStandardPaths>
+#include <QDir>
 Link *link;
 static bool data_arrived1=true,data_arrived2=true,data_arrived3=true,data_arrived4=true,data_arrived5=true,data_arrived6=true,data_arrived7=true,data_arrived8=true,data_arrived9=true,data_arrived10=true,data_arrived11=true,data_arrived12=true,data_arrived13=true,data_arrived14=true,data_arrived15=true,data_arrived16=true;
-//VideoStreamer videostream;
+VideoStreamer videostream;
 Q_DECLARE_METATYPE(long double)
 
 Link::Link()
@@ -131,31 +133,6 @@ void Link::trigger()
 
 void Link::config(QByteArray) {}
 
-void Link::graph_calculation(qfloat16 hyp_D_dist, qfloat16 theta)
-{
-
-    qreal theta_tare = qDegreesToRadians(pitch1 /*theta - pitch_tare*/);
-    //pitch_tare2 = pitch1; //theta - pitch_tare;
-
-    D_height = hyp_D_dist * sin(theta_tare);
-    base_D_distance = (hyp_D_dist * cos(theta_tare));
-
-    graph_x = base_D_distance ;
-    graph_y = D_height;
-    //qDebug()<<graph_x<<pitch1;
-    if (graph_maxY < graph_y)
-        graph_maxY = graph_y;
-    if (graph_minY > graph_y)
-        graph_minY = graph_y;
-    if (graph_maxX < graph_x)
-        graph_maxX = graph_x;
-    if (graph_minX > graph_x)
-        graph_minX = graph_x;
-
-    emit new_data();
-
-
-}
 
 QVariantList Link::cpt_graph()
 {
@@ -206,12 +183,6 @@ QVariantList Link::get_graph_components()
     return graph_array;
 }
 
-void Link::thread_start()
-{
-    this->moveToThread(thread);
-    connect(thread, &QThread::started, this, &Link::parse_string);
-    thread->start();
-}
 
 
 void Link::imu_parsing()
@@ -338,12 +309,118 @@ void Link::export_file(const QVariantList &summary)
 
 void Link::export_log()
 {
+    //qDebug()<<"Directory created";
+    // Get the target directory path for saving files.
+    QString targetDirectory = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    QString logFileDir = targetDirectory + "/Kurma Screenshots";
+
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(logFileDir);
+
+    // Get the target directory path for saving files.
+    QString targetDirectory2 = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    QString logFileDir2 = targetDirectory2 + "/Kurma Map Images";
+
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(logFileDir2);
+
+    // Get the target directory path for saving files.
+    QString targetDirectory3 = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    map_image_path = targetDirectory3 + "/Map-Format Images";
+
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(map_image_path);
+
+
+    // Get the target directory path for saving files.
+    QString targetDirectory4 = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    log_path = targetDirectory4 + "/Kurma-graph LogFiles";
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(log_path);
+    //qDebug()<<log_path;
+    QString targetDirectory5 = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString pdf_path = targetDirectory5 + "/Kurma PdfFiles";
+    QDir logDir(pdf_path);
+    QDir().mkpath(pdf_path);
+
+    // Get the target directory path for saving files.
+    targetDirectory = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    logFileDir5 = targetDirectory + "/Kurma LogFiles";
+    err_path2   = targetDirectory + "/Kurma CommandFiles";
+    err_path3   = targetDirectory + "/Kurma ErrorFiles";
+    bb_path     = targetDirectory + "/Kurma BB";
+
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(logFileDir5);
+    QDir().mkpath(err_path2);
+    QDir().mkpath(err_path3);
+    QDir().mkpath(bb_path);
+
+    emit img_dir_created();
 }
 
 
 void Link::create_directory()
 {
+    //qDebug()<<"Directory created";
+    // Get the target directory path for saving files.
+    QString targetDirectory = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    logFileDir = targetDirectory + "/PipeLine Screenshots";
 
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(logFileDir);
+
+    // Get the target directory path for saving files.
+    QString targetDirectory2 = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    QString logFileDir2 = targetDirectory2 + "/PipeLine Processed Image";
+
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(logFileDir2);
+    videostream.set_image_stitching_path(logFileDir2,1);
+
+    // Get the target directory path for saving files.
+    //QString targetDirectory3 = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    //map_image_path = targetDirectory3 + "/Map-Format Images";
+
+    // Create the directory if it doesn't exist.
+    //QDir().mkpath(map_image_path);
+
+
+    // Get the target directory path for saving files.
+    QString targetDirectory4 = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    log_path = targetDirectory4 + "/PipeLine LogFiles";
+    // Create the directory if it doesn't exist.
+    QDir().mkpath(log_path);
+    //qDebug()<<log_path;
+    /*QString targetDirectory5 = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString pdf_path = targetDirectory5 + "/Kurma PdfFiles";
+    QDir logDir(pdf_path);
+    QDir().mkpath(pdf_path);*/
+
+    // Get the target directory path for saving files.
+    /*targetDirectory = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    // Modify the target directory to add a subdirectory for your files.
+    logFileDir5 = targetDirectory + "/Kurma LogFiles";
+    err_path2   = targetDirectory + "/Kurma CommandFiles";
+    err_path3   = targetDirectory + "/Kurma ErrorFiles";
+    bb_path     = targetDirectory + "/Kurma BB";*/
+
+    // Create the directory if it doesn't exist.
+    /*QDir().mkpath(logFileDir5);
+    QDir().mkpath(err_path2);
+    QDir().mkpath(err_path3);
+    QDir().mkpath(bb_path);*/
+
+    emit img_dir_created();
 }
 
 
@@ -517,6 +594,11 @@ float Link::roll_value() const
     return roll_deg;
 }
 
+QString Link::logFileDir_value() const
+{
+    return logFileDir;
+}
+
 void Link::setYaw_value(float value)
 {
     if (qFuzzyCompare(yaw_deg, value))
@@ -538,4 +620,22 @@ void Link::setRoll_value(float value)
         return;
     roll_deg = value;
     emit rollValueChanged(roll_deg);
+}
+
+void Link::setlogFileDir_value(QString value)
+{
+    if(logFileDir == value)
+        return;
+    logFileDir = value;
+    emit logdirValueChanged(logFileDir);
+}
+
+bool Link::create_dynamic_library(QString path)
+{
+    //qDebug()<<path;
+    //;
+    //emit dynamic_dir_created(path);
+    videostream.set_image_stitching_path(path,0);
+    return QDir().mkpath(path);
+
 }

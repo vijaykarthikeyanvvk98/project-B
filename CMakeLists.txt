@@ -9,7 +9,6 @@ set(OpenCV_DIR
 find_package(OpenCV REQUIRED CONFIG)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Quick Core5Compat)
-find_package(Qt6 REQUIRED COMPONENTS Core )
 
 qt_standard_project_setup()
 
@@ -32,6 +31,8 @@ qt_add_qml_module(project-B
     Main.qml
     RESOURCES images/dummy_template3.jpg
     RESOURCES images/boat.svg
+    RESOURCES images/processing.png
+    RESOURCES images/screenshot3.png
 
 )
 
@@ -48,8 +49,9 @@ target_link_libraries(project-B
         opencv_imgproc
         opencv_highgui
         opencv_videoio
+        opencv_imgcodecs
+        opencv_stitching
 )
-target_link_libraries(project-B PRIVATE Qt6::Core)
 target_link_libraries(project-B PRIVATE Qt6::Core)
 
 include(GNUInstallDirs)

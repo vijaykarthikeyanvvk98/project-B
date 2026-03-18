@@ -19,16 +19,22 @@ class Link : public QObject
     Q_PROPERTY(float yaw_deg READ yaw_value WRITE setYaw_value NOTIFY yawValueChanged)
     Q_PROPERTY(float pitch_deg READ pitch_value WRITE setPitch_value NOTIFY pitchValueChanged)
     Q_PROPERTY(float roll_deg READ roll_value WRITE setRoll_value NOTIFY rollValueChanged)
+    Q_PROPERTY(QString logFileDir READ logFileDir_value WRITE setlogFileDir_value NOTIFY logdirValueChanged)
+
 public:
     Link();
     ~Link();
     float yaw_value () const;
     float pitch_value () const;
     float roll_value () const;
+    QString logFileDir_value () const;
+
 signals:
     void yawValueChanged(float value);
     void pitchValueChanged(float value);
     void rollValueChanged(float value);
+    void logdirValueChanged(QString value);
+
     void data_processed(int);
     void dataUpdated(int);
     void gps_updated();
@@ -66,6 +72,7 @@ signals:
     void err_detected();
     void no_err_detected(int);
     void dir_created(QString);
+    void dynamic_dir_created(QString);
 
 
 public slots:
@@ -81,6 +88,8 @@ public slots:
     void setYaw_value(float value);
     void setPitch_value(float value);
     void setRoll_value(float value);
+    void setlogFileDir_value(QString value);
+    bool create_dynamic_library(QString);
     QVariantList get_heartbeat();
     QVariantList get_ahrs();
     QVariantList get_gps();
@@ -104,12 +113,10 @@ public slots:
     void health_check();
     void set_coordinates(double, double);
     void config(QByteArray);
-    void graph_calculation(qfloat16 distance, qfloat16 pitch1);
     QVariantList cpt_graph();
     void get_pitch_tare();
     void get_cpt_tare();
     QVariantList get_graph_components();
-    void thread_start();
     void imu_parsing();
     void AHRS_parsing();
     void gps_parsing();
@@ -372,7 +379,7 @@ private:
     QString err_path3 = "";
     QString err_path4 = "";
     QString err_path5 = "";
-
+    QString bb_path="";
 
     QString graph_path="",graph_path2="";
     QString cpt_path="",cpt_path2="";
@@ -426,7 +433,7 @@ private:
     QTimer *timer9;
     QTimer *timer10;
     QVariantList data,data2,data3,data4,data5,data6,data7,data8,data9,data10;
-
+    QString logFileDir ="";
     QMutex sendMutex,bufferMutex,parseMutex,mutex1,mutex11,mutex2,mutex3,mutex4,mutex5,mutex6,mutex7,mutex8,mutex9,mutex10,health_mutex;
 };
 

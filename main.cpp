@@ -6,6 +6,8 @@
 #include <QQmlApplicationEngine>
 #include "opencvimageprovider.h"
 #include "videostreamer.h"
+#include "link.h"
+
 using namespace cv;
 int main(int argc, char *argv[])
 {
@@ -16,6 +18,7 @@ int main(int argc, char *argv[])
     //videoStreamer.create_directory();
 
     OpencvImageProvider *liveImageProvider(new OpencvImageProvider);
+    Link link;
 
     QQmlApplicationEngine engine;
 
@@ -23,6 +26,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("liveImageProvider", liveImageProvider);
 
+    engine.rootContext()->setContextProperty("link", &link);
 
     engine.addImageProvider("live", liveImageProvider);
 
@@ -44,6 +48,10 @@ int main(int argc, char *argv[])
                      &VideoStreamer::newImage4,
                      liveImageProvider,
                      &OpencvImageProvider::updateImage4);
+    /*QObject::connect(&link,
+                     &Link::dynamic_dir_created,
+                     &videoStreamer,
+                     &VideoStreamer::set_image_stitching_path);*/
     engine.loadFromModule("project-B", "Main");
     // Tell Qt to look for modules in the local 'qml' folder we just copied
     //engine.addImportPath(QCoreApplication::applicationDirPath() + "/qml");
