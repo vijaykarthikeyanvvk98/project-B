@@ -26,10 +26,10 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '6.8.3'
+        version: '6.8.0'
         host: 'windows'
         target: 'desktop'
-        arch: 'win64_msvc2019_64' # Standard for Qt 6 on Windows
+        arch: 'win64_msvc2022_64' # Standard for Qt 6 on Windows
 
     # 2. Set up MSVC (Visual Studio Compiler)
     - name: Set up MSVC
