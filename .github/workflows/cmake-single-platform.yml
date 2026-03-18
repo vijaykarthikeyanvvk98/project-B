@@ -39,16 +39,22 @@ jobs:
     - name: Download Custom OpenCV
       shell: pwsh
       run: |
-        # Replace the URL below with your actual Published Release Link
-        $url = "https://github.com/vijaykarthikeyanvvk98/project-B/releases/tag/v1.0.0/build2.zip"
-        Invoke-WebRequest -Uri $url -OutFile "opencv.zip"
-        Expand-Archive -Path "opencv.zip" -DestinationPath "C:\custom_deps"
-
+        # 1. Download the zip from your release tag
+        gh release download v1.0-deps --pattern "build2.zip" --repo ${{ github.repository }}
         
-    # 4. Configure CMake
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        # 2. Unzip it
+        Expand-Archive -Path "build2.zip" -DestinationPath "C:\custom_deps" -Force
 
-    # 5. Build
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    - name: List Files (Debug Step)
+      shell: pwsh
+      run: |
+        # This will show us exactly where the .cmake file is
+        Get-ChildItem -Path "C:\custom_deps" -Recurse -Filter "OpenCVConfig.cmake" | Select-Object FullName
+
+    - name: Configure CMake
+      run: |
+        # We start with the base folder. 
+        # If the 'List Files' step shows it's deeper, we will adjust this path next.
+        cmake -B build `
+        -DCMAKE_BUILD_TYPE=Release `
+        -DOpenCV_DIR="C:\custom_deps"
