@@ -1,0 +1,77 @@
+# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
+name: Windows Qt6 Build with Custom OpenCV
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # 1. Install Qt 6.10.1 for Windows
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.8.0'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64' # Standard for Qt 6 on Windows
+
+    # 2. Set up MSVC (Visual Studio Compiler)
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+# 3. Download and Unzip your Custom OpenCV
+    - name: Download Custom OpenCV
+      shell: pwsh
+      run: |
+        # Using your exact tag: v-1.0.0
+        $url = "https://github.com/vijaykarthikeyanvvk98/project-B/releases/download/v1.0.0/build2.zip"
+        
+        Write-Host "Attempting download from: $url"
+        
+        # Download the zip
+        Invoke-WebRequest -Uri $url -OutFile "build2.zip"
+        
+        # Unzip to a temporary folder
+        if (Test-Path "build2.zip") {
+            Expand-Archive -Path "build2.zip" -DestinationPath "C:\custom_deps" -Force
+            Write-Host "Unzip complete."
+        } else {
+            Write-Error "Download failed! Check if the release is Published and the Tag is correct."
+            exit 1
+        }
+
+    - name: List Files (The Magic Path Finder)
+      shell: pwsh
+      run: |
+        # This will search the unzipped folder and tell us the EXACT path to use for CMake
+        $file = Get-ChildItem -Path "C:\custom_deps" -Recurse -Filter "OpenCVConfig.cmake" | Select-Object -First 1
+        if ($file) {
+            Write-Host "FOUND IT! Use this path in the next step:"
+            Write-Host $file.DirectoryName
+        } else {
+            Write-Error "Could not find OpenCVConfig.cmake in the zip file!"
+        }
+
+    - name: Configure CMake
+      run: |
+        # We start with the base folder. 
+        # If the 'List Files' step shows it's deeper, we will adjust this path next.
+        cmake -B build `
+        -DCMAKE_BUILD_TYPE=Release `
+        -DOpenCV_DIR="C:\custom_deps"
