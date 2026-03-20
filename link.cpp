@@ -14,13 +14,17 @@ Link::Link()
     connect(&mainWindow, &MainWindow::data_received, this, &Link::send_data_to_process);
     connect(this, &Link::data_processed, this, &Link::data_to_be_updated);
 
-    QTimer *timer2 = new QTimer(this);
-    QTimer *timer3 = new QTimer(this);
+    timer2 = new QTimer(this);
+    timer3 = new QTimer(this);
 }
 
 Link::~Link()
 {
+    if(timer2 && timer2->isActive())
+        timer2->stop();
 
+    if(timer3 && timer3->isActive())
+        timer3->stop();
 }
 
 bool Link::areDoublesEqual(double a, double b, double epsilon)
@@ -375,6 +379,7 @@ void Link::create_directory()
 
     // Create the directory if it doesn't exist.
     QDir().mkpath(logFileDir);
+    videostream.set_image_stitching_path(logFileDir,2);
 
     // Get the target directory path for saving files.
     QString targetDirectory2 = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);

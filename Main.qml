@@ -6,7 +6,6 @@ import Qt5Compat.GraphicalEffects
 import QtQuick.Effects
 import QtQuick.Window 2.15
 import QtQuick.Controls.Material 2.15
-
 ApplicationWindow {
     id: root
     visible: true
@@ -29,6 +28,20 @@ ApplicationWindow {
     property color neonblue: "#00FFFF"
     property color neonGreen: "#39FF14"
     property bool record_status: false
+
+    property real size: 100
+       property real _reticleHeight: 1
+       property real _reticleSpacing: size * 0.15
+       property real _reticleSlot: _reticleSpacing + _reticleHeight
+       property real _longDash: size * 0.35
+       property real _shortDash: size * 0.25
+       property real _fontSize: 0.005 * root.width
+
+    // Scale Logic (Replacing CircularGaugeStyle angles)
+    property real startAngle: 90  // Your minimumValueAngle
+    property real endAngle: -90   // Your maximumValueAngle
+
+
     Rectangle
     {
         id:sensor_panel
@@ -226,7 +239,7 @@ ApplicationWindow {
                                 else
                                 {
                                 tooltip_text= "Start\nVideo Recording"
-                                statusindicator2.color="red"
+                                statusincdicator2.color="red"
                                 VideoStreamer.stop_recording()
                                 start_Timer.elapsedTime=0
                                 timerText.text="00:00:00"
@@ -351,8 +364,9 @@ ApplicationWindow {
             id: opencvImage3
             width: 0.99 * parent.width
             height: 0.99*parent.height // 16:9 aspect ratio
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.centerIn: parent
+            anchors.verticalCenter: parent.verticalCenter
+            rotation: 90
+            //anchors.centerIn: parent
             clip:true
             //fillMode: Image.PreserveAspectCrop
             property bool counter: false
@@ -392,8 +406,9 @@ ApplicationWindow {
             id: opencvImage2
             width: 0.99 * parent.width
             height: 0.99*parent.height // 16:9 aspect ratio
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.centerIn: parent
+            anchors.verticalCenter: parent.verticalCenter
+            rotation: -90
+            //anchors.centerIn: parent
             clip:true
             //fillMode: Image.PreserveAspectCrop
             property bool counter: false
@@ -435,6 +450,7 @@ ApplicationWindow {
             height: 0.99*parent.height // 16:9 aspect ratio
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.centerIn: parent
+            rotation: 180
             clip:true
             //fillMode: Image.PreserveAspectCrop
             property bool counter: false
@@ -969,6 +985,12 @@ ApplicationWindow {
             template_content2.text="Images has been processed successfully!!!"
             message_template2.open()
         }
+
+        function onImage_captured()
+        {
+            template_content2.text = "Frame has been\n Captured Successfully!!!"
+            message_template2.open()
+        }
     }
 
 
@@ -985,9 +1007,9 @@ ApplicationWindow {
                             var formattedDate1 = date1.toLocaleString(Qt.locale("en_IN"), "dd.MM.yyyy-hh.mm.ss");
                             var logFileDir2= logFileDir +"/Screenshots "+ formattedDate1
                             if(link.create_dynamic_library(logFileDir2))
-                                ;//console.log(true)
+                                VideoStreamer.save_image(logFileDir2);//console.log(true)
                            // Capture and save the image
-                            var rectangles = [imageRect,imageRect2,imageRect3,imageRect4]
+                            /*var rectangles = [imageRect,imageRect2,imageRect3,imageRect4]
                             var rect,count_ss= 0;
                             for (var i = 0; i < rectangles.length; i++) {
                                 (function (rect) {
@@ -1008,7 +1030,7 @@ ApplicationWindow {
                                     }, Qt.size(opencvImage.sourceSize.width, opencvImage.sourceSize.height));
                                 })(rectangles[i]);
                             }
-                               map_image_Captured()
+                               map_image_Captured()*/
 
                }
 
@@ -1206,6 +1228,7 @@ ApplicationWindow {
                 function onRecord_statusChanged() {
                     sta_sto.requestPaint()
                 }
+
             }
         }
     }
@@ -1304,4 +1327,245 @@ ApplicationWindow {
                          font.pixelSize:Math.min(root.width/47,root.height/37)
                          opacity: statusindicator2.opacity
                      }
+
+
+       OpacityMask {
+                    anchors.fill: artificialHorizon2
+                    source: artificialHorizon2
+                    maskSource: mask
+                    z: 1
+                }
+                Rectangle {
+                    id: mask
+                    anchors.fill: artificialHorizon2
+                    radius: artificialHorizon2.width / 2
+                    color: "black"
+                    visible: false
+                    z: 1
+                }
+                Image {
+                    id: line_1
+                    source: "qrc:/project-B/images/crossHair.png"
+                    anchors.centerIn: artificialHorizon2
+                    mipmap: true
+                    z: 2
+                    width: 0.075 * root.width
+                    sourceSize.width: width
+                    fillMode: Image.PreserveAspectFit
+                    visible:true
+
+                /*Image {
+                    id: head_2
+                    width: 0.25 * parent.width
+                    height: 0.005 * root.height
+                    anchors.top: artificialHorizon2.top
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    z: 3
+                    visible: true
+                    source: "qrc:/resources/images/up_button_red.svg"
+                }*/
+
+
+                    /*Connections {
+                        target: hud_visual
+                        function onWidthChanged() {
+                            head_2.requestPaint()
+                        }
+                    }
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
+                        ctx.fillStyle = "red"
+                        ctx.beginPath()
+                        ctx.moveTo(0, height) // Start from the bottom-left corner
+                        ctx.lineTo(width / 2, 0) // Draw to the top-middle point
+                        ctx.lineTo(width, height) // Draw to the bottom-right corner
+                        ctx.closePath()
+                        ctx.fill()
+                    }*/
+                }
+                Rectangle {
+                    id: artificialHorizon2
+                    visible: false
+                    width: 0.075 * root.width
+                    height: width
+                    anchors
+                    {
+                        //top:modePanel.top
+                        //left:gauge.left
+                        //margins:0.005*root.width
+                        centerIn:camera_panel
+                    }
+
+                    color: "transparent"
+                    radius: 100
+
+                    Rectangle {
+                        id: artificialHorizon
+                        width: root.width * 4
+                        height: root.height * 8
+                        anchors.centerIn: parent
+                        visible: true
+                        opacity:  1.0
+
+                        Rectangle {
+                            height: size * 0.75
+                            width: size * 0.9
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: Qt.rgba(0, 0, 0, 0)
+                            clip: true
+                            z: 2
+                            Item {
+                                height: parent.height
+                                width: parent.width
+                                Column {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: _reticleSpacing
+                                    Repeater {
+                                        model: 36
+                                        Rectangle {
+                                            property int _pitch: -(modelData * 5 - 90)
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            width: (_pitch % 10) === 0 ? _longDash : _shortDash
+                                            height: _reticleHeight
+                                            color: "white"
+                                            antialiasing: true
+                                            smooth: true
+
+                                            Text {
+                                                id: pitch_indicator_1
+                                                anchors.horizontalCenter: parent.horizontalCenter
+                                                anchors.horizontalCenterOffset: -(_longDash)
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                smooth: true
+                                                //font.family: ScreenTools.demiboldFontFamily
+                                                font.pointSize:  0.5 * _fontSize
+                                                text: _pitch
+                                                font.bold: true
+                                                style: Text.Sunken
+                                                color: "white"
+                                                visible: (_pitch !== 0)
+                                                         && ((_pitch % 10) === 0)
+                                            }
+
+                                            Text {
+                                                id: pitch_indicator_2
+                                                anchors.horizontalCenter: parent.horizontalCenter
+                                                anchors.horizontalCenterOffset: (_longDash)
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                smooth: true
+                                                //font.family: ScreenTools.demiboldFontFamily
+                                                font.pointSize:  0.5 * _fontSize
+                                                text: (_pitch)
+                                                font.bold: true
+                                                style: Text.Sunken
+                                                color: "white"
+                                                visible: (_pitch !== 0)
+                                                         && ((_pitch % 10) === 0)
+                                            }
+                                        }
+                                    }
+                                }
+                                transform: [
+                                    Translate {
+                                        y: (pitch * _reticleSlot / 7) - (_reticleSlot / 2)
+                                    }
+                                ]
+                            }
+                        }
+
+                        Rectangle {
+                            id: sky
+                            anchors.fill: parent
+                            z: 1
+                            smooth: true
+                            antialiasing: true
+                            gradient: Gradient {
+                                GradientStop {
+                                    position: 0.25
+                                    color: Qt.hsla(0.6, 1.0, 0.25)
+                                }
+                                GradientStop {
+                                    position: 0.5
+                                    color: Qt.hsla(0.6, 0.5, 0.55)
+                                }
+                            }
+                        }
+                        Rectangle {
+                            id: ground
+                            z: 1
+                            height: sky.height / 2
+                            anchors {
+                                left: sky.left
+                                right: sky.right
+                                bottom: sky.bottom
+                            }
+                            smooth: true
+                            antialiasing: true
+                            gradient: Gradient {
+                                GradientStop {
+                                    position: 0.0
+                                    color: Qt.hsla(0.25, 0.5, 0.45)
+                                }
+                                GradientStop {
+                                    position: 0.25
+                                    color: Qt.hsla(0.25, 0.75, 0.25)
+                                }
+                            }
+                        }
+                        transform: [
+                            Translate {
+                                y: pitch
+                            },
+                            Rotation {
+                                origin.x: artificialHorizon.width / 2
+                                origin.y: artificialHorizon.height / 2
+                                angle: roll
+                            }
+                        ]
+                    }
+                }
+
+                /*Dial {
+                    id: hud_visual
+                    width: 0.075 * root.width
+                    height: width
+                    anchors.centerIn: camera_panel
+                    // Logic for visibility remains the same
+                    visible: false//cam.height > root.height / 2 ? false : (hudis ? true : false)
+                    z: 2
+
+                    // Range settings
+                    from: -90
+                    to: 90
+                    value: 0
+
+
+                    // Background handles the visual "Style" from your old code
+                        background: Rectangle {
+                            color: "transparent"
+
+                            // Major Tickmarks Repeater
+                            Repeater {
+                                model: 5 // -90, -45, 0, 45, 90
+                                delegate: Rectangle {
+                                    readonly property real val: -90 + (index * 45)
+                                    width: 2
+                                    height: hud_visual.width * 0.08
+                                    color: "#e34c22" // Your original orange color
+                                    antialiasing: true
+
+                                    x: parent.width / 2 - width / 2
+                                    y: 0
+                                    transformOrigin: Item.Bottom
+                                    // Maps the value to the physical rotation
+                                    rotation: val
+                                }
+                            }
+                        }
+
+
+                }*/
 }

@@ -42,6 +42,7 @@ public slots:
     void streamerThreadSlot();
     void image_stitching();
     void set_image_stitching_path(QString,int);
+    void save_image(QString);
     //void streamerThreadSlot2();
 
 private:
@@ -71,14 +72,14 @@ private:
     cv::Point textPos;
     QFile subtitleFile;
     QTextStream out;
-    QMutex frameMutex,frameMutex2,frameMutex3,frameMutex4;
+    QMutex frameMutex,frameMutex2,frameMutex3,frameMutex4,frameMutex5;
 
 signals:
     void newImage(QImage &);
     void newImage2(QImage &);
     void newImage3(QImage &);
     void newImage4(QImage &);
-
+    void image_captured();
 
 
     void recording_stop();

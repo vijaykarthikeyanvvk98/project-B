@@ -33,6 +33,7 @@ qt_add_qml_module(project-B
     RESOURCES images/boat.svg
     RESOURCES images/processing.png
     RESOURCES images/screenshot3.png
+    RESOURCES images/crossHair.png
 
 )
 

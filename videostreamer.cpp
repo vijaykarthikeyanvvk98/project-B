@@ -16,6 +16,7 @@ const QString VIDEO_PATH2 = "C:/Users/vijay/Videos/test2.mp4";
 const QString VIDEO_PATH3 = "C:/Users/vijay/Videos/test2.mp4";
 const QString VIDEO_PATH4 = "C:/Users/vijay/Videos/Captures/ORCA 2026-02-16 12-22-41.mp4";
 static bool recording_status=false,recording_status2=false,recording_status3=false,recording_status4=false;
+static bool recording_status5=false,recording_status6=false,recording_status7=false,recording_status8=false;
 static VideoWriter video,writing_video,video2,video3,video4;
 double fps=25.00,fps2=25.00,fps3=25.00,fps4=25.00;
 static int frame_count = 0;
@@ -71,6 +72,9 @@ QTimer *timer=nullptr,*timer2=nullptr;
 cv::Mat tempFrame,tempFrame2,tempFrame3,tempFrame4;
 cv::Mat frame2,frame3,frame4;
 static cv::Mat writeFrame,writeFrame2,writeFrame3,writeFrame4;
+static cv::Mat writeFrame5,writeFrame6,writeFrame7,writeFrame8;
+
+QString image_path="";
 
 VideoStreamer::VideoStreamer()
 {
@@ -720,15 +724,15 @@ void VideoStreamer::image_stitching()
 
     QFileInfoList fileList = dir.entryInfoList(filters, QDir::Files);
 
-    if(fileList.size() < 4)
+    /*if(fileList.size() < 4)
     {
         //qDebug() << "Less than 4 images found";
         return;
-    }
+    }*/
 
     std::vector<cv::Mat> imgs;
 
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < fileList.size(); i++)
     {
         QString filePath = fileList[i].absoluteFilePath();
 
@@ -759,7 +763,7 @@ void VideoStreamer::image_stitching()
     cv::Rect crop_zone(shave, 0, w - (2 * shave), h);
 
     std::vector<cv::Mat> cropped_imgs;
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < imgs.size(); i++) {
         cropped_imgs.push_back(imgs[i](crop_zone));
     }
 
@@ -783,10 +787,71 @@ void VideoStreamer::set_image_stitching_path(QString path, int mode)
     case 1:
         stitching_path2 = path;
         break;
+    case 2:
+        image_path = path;
     default:
         break;
     }
     //qDebug()<<stitching_path<<stitching_path2;
+}
+
+void VideoStreamer::save_image(QString path)
+{
+    QMutexLocker locker(&frameMutex5);
+    if(path.isEmpty())
+    {
+        qDebug() << "Stitching path is empty";
+        return;
+    }
+    else
+        ;
+
+    QDateTime currentDateTime1 = QDateTime::currentDateTime();
+    formattedTime = currentDateTime1.toString("dd.MM.yyyy-hh.mm.ss");
+    QString filepath5 = path;// + "/Screenshots - "+ formattedTime;
+
+    QString path1="",path2="",path3="",path4="",write_path="";
+
+    std::vector<cv::Mat> imgs;
+
+    imgs.push_back(frame);
+    imgs.push_back(frame2);
+    imgs.push_back(frame3);
+    imgs.push_back(frame4);
+
+    for(int i = 0; i<=3;i++)
+    {
+        currentDateTime1 = QDateTime::currentDateTime();
+        formattedTime = currentDateTime1.toString("dd.MM.yyyy-hh.mm.ss");
+        write_path =  filepath5+"/screenshot_" + formattedTime + "_" + QString::number(i,10)+".jpeg";
+        //qDebug()<<write_path;
+        if(imgs[i].data)
+            cv::imwrite(write_path.toStdString(), imgs[i]);
+        else
+            ;//qDebug()<<"Empty";
+
+    }
+    /*if(frame.data)
+        QImage img = QImage(frame.data,frame.cols,frame.rows,QImage::Format_RGB888).rgbSwapped();
+
+    if(frame2.data)
+        QImage img2 = QImage(frame2.data,frame2.cols,frame2.rows,QImage::Format_RGB888).rgbSwapped();
+
+
+    if(frame3.data)
+        QImage img3 = QImage(frame3.data,frame3.cols,frame3.rows,QImage::Format_RGB888).rgbSwapped();
+
+
+    if(frame4.data)
+        QImage img4 = QImage(frame4.data,frame4.cols,frame4.rows,QImage::Format_RGB888).rgbSwapped();*/
+
+    /*cv::imwrite(path1.toStdString(), frame);
+    cv::imwrite(path2.toStdString(), frame2);
+    cv::imwrite(path3.toStdString(), frame3);
+    cv::imwrite(path4.toStdString(), frame4);*/
+    emit image_captured();
+
+
 }
 
 Worker::Worker(QObject *parent)
